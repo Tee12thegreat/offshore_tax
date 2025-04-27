@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZIMRA Offshore Tax Detection</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <img src="images/zimra-logo.png" alt="ZIMRA Logo">
+                <h1>Offshore Tax Detection System</h1>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="#dashboard" class="active">Dashboard</a></li>
+                    <li><a href="#cases">Case Management</a></li>
+                    <li><a href="#analytics">Analytics</a></li>
+                    <li><a href="#international">International</a></li>
+                    <li><a href="#best-practices">Best Practices</a></li>
+                </ul>
+            </nav>
+            <div class="user-menu">
+                <span>Welcome, Investigator</span>
+                <div class="avatar">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section id="dashboard" class="section active">
+            <div class="container">
+                <h2>Detection Dashboard</h2>
+                <div class="stats-grid">
+                    <div class="stat-card fade-in">
+                        <div class="stat-icon">
+                            <i class="fas fa-search-dollar"></i>
+                        </div>
+                        <h3>Potential Cases</h3>
+                        <p class="stat-value" id="potential-cases">0</p>
+                        <p class="stat-change positive">+12% from last month</p>
+                    </div>
+                    
+                    <div class="stat-card fade-in">
+                        <div class="stat-icon">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <h3>Amount Recovered</h3>
+                        <p class="stat-value" id="amount-recovered">$0</p>
+                        <p class="stat-change positive">+$2.4M this quarter</p>
+                    </div>
+                    
+                    <div class="stat-card fade-in">
+                        <div class="stat-icon">
+                            <i class="fas fa-globe-africa"></i>
+                        </div>
+                        <h3>Int'l Requests</h3>
+                        <p class="stat-value" id="intl-requests">0</p>
+                        <p class="stat-change neutral">No change</p>
+                    </div>
+                    
+                    <div class="stat-card fade-in">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Detection Rate</h3>
+                        <p class="stat-value" id="detection-rate">0%</p>
+                        <p class="stat-change positive">+8% YoY</p>
+                    </div>
+                </div>
+                
+                <div class="main-grid">
+                    <div class="card chart-card slide-up">
+                        <h3>Monthly Detection Trends</h3>
+                        <div class="chart-container">
+                            <canvas id="trends-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="card alert-card slide-up">
+                        <h3>Priority Alerts</h3>
+                        <div class="alert-list" id="alert-list">
+                            <!-- Alerts will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Other sections would go here with similar structure -->
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>ZIMRA Offshore Tax Evasion Detection System &copy; 2023</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Use</a>
+                <a href="#">Help Center</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
