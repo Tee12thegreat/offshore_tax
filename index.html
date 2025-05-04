@@ -1218,33 +1218,35 @@ h2::after {
                 <!-- Simulation Results -->
                 <div class="simulation-results">
                     <h3>Simulation Results</h3>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-user-secret"></i>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-user-secret"></i>
+                            </div>
+                            <h3>Evasion Attempts</h3>
+                            <p class="stat-value" id="attempts-count">0</p>
                         </div>
-                        <h3>Evasion Attempts</h3>
-                        <p class="stat-value" id="attempts-count">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-search"></i>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3>Detected</h3>
+                            <p class="stat-value" id="detected-count">0</p>
                         </div>
-                        <h3>Detected</h3>
-                        <p class="stat-value" id="detected-count">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-percentage"></i>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <h3>Detection Rate</h3>
+                            <p class="stat-value" id="detection-rate-sim">0%</p>
                         </div>
-                        <h3>Detection Rate</h3>
-                        <p class="stat-value" id="detection-rate">0%</p>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-money-bill-wave"></i>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <h3>Amount Evaded</h3>
+                            <p class="stat-value" id="amount-evaded">$0</p>
                         </div>
-                        <h3>Amount Evaded</h3>
-                        <p class="stat-value" id="amount-evaded">$0</p>
                     </div>
                     
                     <div class="card">
@@ -1985,316 +1987,278 @@ function initExchangeChart() {
 
 // Simulation Module
 document.addEventListener('DOMContentLoaded', function() {
-    // Simulation state
-    const simulationState = {
-        currentTaxpayer: null,
-        selectedScenario: null,
-        transactions: [],
-        chart: null
-    };
-    
-    // Initialize UI
-    initUI();
-    
-    // Set up event listeners
-    document.getElementById('create-taxpayer').addEventListener('click', createTaxpayer);
-    document.querySelectorAll('.scenario-card').forEach(card => {
-        card.addEventListener('click', selectScenario);
-    });
-    document.getElementById('run-simulation').addEventListener('click', runSimulation);
-});
-
-function initUI() {
-    // Hide results initially
-    document.querySelector('.simulation-results').style.display = 'none';
-    // Disable run simulation button initially
-    document.getElementById('run-simulation').disabled = true;
-}
-
-function createTaxpayer() {
-    const name = document.getElementById('taxpayer-name').value.trim();
-    const tin = document.getElementById('taxpayer-tin').value.trim();
-    const income = document.getElementById('taxpayer-income').value;
-    
-    if (!name || !tin) {
-        alert('Please enter both name and tax ID');
-        return;
-    }
-    
-    simulationState.currentTaxpayer = {
-        name,
-        tin,
-        income
-    };
-    
-    // Enable scenario selection
-    document.getElementById('run-simulation').disabled = false;
-    
-    alert(`Taxpayer profile created for ${name} (${tin})`);
-}
-
-function selectScenario(e) {
-    // Remove selection from all cards
-    document.querySelectorAll('.scenario-card').forEach(card => {
-        card.classList.remove('selected');
-    });
-    
-    // Add to clicked card
-    const card = e.currentTarget;
-    card.classList.add('selected');
-    
-    // Store selected scenario
-    simulationState.selectedScenario = card.getAttribute('data-scenario');
-}
-
-function runSimulation() {
-    if (!simulationState.currentTaxpayer) {
-        alert('Please create a taxpayer profile first');
-        return;
-    }
-    
-    if (!simulationState.selectedScenario) {
-        alert('Please select an evasion scenario');
-        return;
-    }
-    
-    // Clear previous transactions
-    simulationState.transactions = [];
-    
-    // Generate transactions based on scenario
-    const numTransactions = Math.floor(Math.random() * 10) + 5; // 5-15 transactions
-    const baseAmount = getBaseAmount(simulationState.currentTaxpayer.income);
-    let totalEvaded = 0;
-    let totalDetected = 0;
-    
-    for (let i = 0; i < numTransactions; i++) {
-        // Randomize amount (±50% of base amount)
-        const amount = baseAmount * (0.5 + Math.random());
-        totalEvaded += amount;
-        
-        // Randomize date within last 12 months
-        const transactionDate = new Date();
-        transactionDate.setMonth(transactionDate.getMonth() - Math.floor(Math.random() * 12));
-        
-        // Determine if detected based on scenario probability
-        const isDetected = Math.random() < getDetectionProbability(simulationState.selectedScenario);
-        const detectionMethod = isDetected ? getDetectionMethod(simulationState.selectedScenario) : null;
-        
-        if (isDetected) {
-            totalDetected += amount;
-            
-            // Add to main system alerts
-            addToMainAlerts({
-                amount,
-                date: transactionDate,
-                method: detectionMethod
-            });
-        }
-        
-        simulationState.transactions.push({
-            id: Date.now() + i,
-            amount: parseFloat(amount.toFixed(2)),
-            date: transactionDate,
-            detected: isDetected,
-            detectionDate: isDetected ? 
-                new Date(transactionDate.getTime() + Math.random() * 30 * 24 * 60 * 60 * 1000) : null,
-            detectionMethod: detectionMethod
-        });
-    }
-    
-    // Update UI with results
-    displayResults(totalEvaded, totalDetected);
-    
-    // Show results section
-    document.querySelector('.simulation-results').style.display = 'block';
-}
-
-function getBaseAmount(incomeLevel) {
-    switch(incomeLevel) {
-        case 'low': return 5000;
-        case 'medium': return 15000;
-        case 'high': return 30000;
-        default: return 10000;
-    }
-}
-
-function getDetectionProbability(scenario) {
-    const probabilities = {
-        offshore: 0.65,
-        underreport: 0.45,
-        expenses: 0.55,
-        crypto: 0.35
-    };
-    return probabilities[scenario] || 0.5;
-}
-
-function getDetectionMethod(scenario) {
-    const methods = {
-        offshore: ['CRS Data Match', 'Bank Leak Analysis', 'Whistleblower Tip'],
-        underreport: ['Income Discrepancy', 'Third-Party Reporting', 'Audit Findings'],
-        expenses: ['Expense Pattern Analysis', 'Supplier Verification', 'Industry Benchmarking'],
-        crypto: ['Blockchain Analysis', 'Exchange Reporting', 'Wallet Identification']
-    };
-    
-    const availableMethods = methods[scenario] || ['Data Analysis', 'Automated Alert', 'Manual Review'];
-    return availableMethods[Math.floor(Math.random() * availableMethods.length)];
-}
-
-function addToMainAlerts(transaction) {
-    // In a real app, this would add to your main alert system
-    const scenarioName = {
-        offshore: 'Offshore Account Concealment',
-        underreport: 'Underreported Income',
-        expenses: 'Fictitious Expenses',
-        crypto: 'Cryptocurrency Concealment'
-    }[simulationState.selectedScenario];
-    
-    const newAlert = {
-        title: `Detected ${scenarioName}`,
-        description: `Taxpayer ${simulationState.currentTaxpayer.name} (${simulationState.currentTaxpayer.tin}) evaded $${transaction.amount.toLocaleString()}`,
-        status: "warning",
-        date: formatDate(transaction.date),
-        amount: transaction.amount,
-        method: transaction.method
-    };
-    
-    // Add to your existing alerts array
-    // Assuming you have a global alerts array and renderAlerts() function
-    if (typeof alerts !== 'undefined') {
-        alerts.push(newAlert);
-        
-        // Refresh alerts display if on dashboard
-        if (document.querySelector('#dashboard').classList.contains('active') && typeof renderAlerts === 'function') {
-            renderAlerts();
-        }
-    }
-}
-
-function displayResults(totalEvaded, totalDetected) {
-    // Update stats
-    document.getElementById('attempts-count').textContent = simulationState.transactions.length;
-    document.getElementById('detected-count').textContent = simulationState.transactions.filter(t => t.detected).length;
-    document.getElementById('detection-rate').textContent = `${Math.round((totalDetected / totalEvaded) * 100)}%`;
-    document.getElementById('amount-evaded').textContent = `$${totalEvaded.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
-    
-    // Render chart
-    renderSimulationChart();
-    
-    // Render transaction list
-    renderTransactionList();
-}
-
-function renderSimulationChart() {
-    const ctx = document.getElementById('simulation-chart');
-    if (!ctx) return;
-    
-    // Destroy previous chart if exists
-    if (simulationState.chart) {
-        simulationState.chart.destroy();
-    }
-    
-    // Group transactions by month
-    const monthlyData = {};
-    simulationState.transactions.forEach(t => {
-        const monthYear = `${t.date.getFullYear()}-${t.date.getMonth()}`;
-        if (!monthlyData[monthYear]) {
-            monthlyData[monthYear] = {
-                total: 0,
-                detected: 0
+            // Simulation state
+            const simulationState = {
+                currentTaxpayer: null,
+                selectedScenario: null,
+                transactions: [],
+                chart: null
             };
-        }
-        monthlyData[monthYear].total += t.amount;
-        if (t.detected) {
-            monthlyData[monthYear].detected += t.amount;
-        }
-    });
-    
-    // Prepare chart data
-    const labels = Object.keys(monthlyData).sort().map(key => {
-        const [year, month] = key.split('-');
-        return new Date(year, month).toLocaleDateString(undefined, {month: 'short', year: 'numeric'});
-    });
-    
-    const totalData = Object.keys(monthlyData).sort().map(key => monthlyData[key].total);
-    const detectedData = Object.keys(monthlyData).sort().map(key => monthlyData[key].detected);
-    
-    simulationState.chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Total Evaded',
-                    data: totalData,
-                    backgroundColor: 'rgba(52, 152, 219, 0.7)'
-                },
-                {
-                    label: 'Detected',
-                    data: detectedData,
-                    backgroundColor: 'rgba(46, 204, 113, 0.7)'
+            
+            // Initialize UI
+            initUI();
+            
+            // Set up event listeners
+            document.getElementById('create-taxpayer').addEventListener('click', createTaxpayer);
+            document.querySelectorAll('.scenario-card').forEach(card => {
+                card.addEventListener('click', selectScenario);
+            });
+            document.getElementById('run-simulation').addEventListener('click', runSimulation);
+            
+            function initUI() {
+                // Hide results initially
+                document.querySelector('.simulation-results').style.display = 'none';
+                // Disable run simulation button initially
+                document.getElementById('run-simulation').disabled = true;
+            }
+            
+            function createTaxpayer() {
+                const name = document.getElementById('taxpayer-name').value.trim();
+                const tin = document.getElementById('taxpayer-tin').value.trim();
+                const income = document.getElementById('taxpayer-income').value;
+                
+                if (!name || !tin) {
+                    alert('Please enter both name and tax ID');
+                    return;
                 }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Amount ($)'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Month'
-                    }
+                
+                simulationState.currentTaxpayer = {
+                    name,
+                    tin,
+                    income
+                };
+                
+                // Enable scenario selection
+                document.getElementById('run-simulation').disabled = false;
+                
+                alert(`Taxpayer profile created for ${name} (${tin})`);
+            }
+            
+            function selectScenario(e) {
+                // Remove selection from all cards
+                document.querySelectorAll('.scenario-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                
+                // Add to clicked card
+                const card = e.currentTarget;
+                card.classList.add('selected');
+                
+                // Store selected scenario
+                simulationState.selectedScenario = card.getAttribute('data-scenario');
+            }
+            
+            function runSimulation() {
+                if (!simulationState.currentTaxpayer) {
+                    alert('Please create a taxpayer profile first');
+                    return;
                 }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.dataset.label}: $${context.raw.toLocaleString()}`;
-                        }
+                
+                if (!simulationState.selectedScenario) {
+                    alert('Please select an evasion scenario');
+                    return;
+                }
+                
+                // Clear previous transactions
+                simulationState.transactions = [];
+                
+                // Generate transactions based on scenario
+                const numTransactions = Math.floor(Math.random() * 10) + 5; // 5-15 transactions
+                const baseAmount = getBaseAmount(simulationState.currentTaxpayer.income);
+                let totalEvaded = 0;
+                let totalDetected = 0;
+                
+                for (let i = 0; i < numTransactions; i++) {
+                    // Randomize amount (±50% of base amount)
+                    const amount = baseAmount * (0.5 + Math.random());
+                    totalEvaded += amount;
+                    
+                    // Randomize date within last 12 months
+                    const transactionDate = new Date();
+                    transactionDate.setMonth(transactionDate.getMonth() - Math.floor(Math.random() * 12));
+                    
+                    // Determine if detected based on scenario probability
+                    const isDetected = Math.random() < getDetectionProbability(simulationState.selectedScenario);
+                    const detectionMethod = isDetected ? getDetectionMethod(simulationState.selectedScenario) : null;
+                    
+                    if (isDetected) {
+                        totalDetected += amount;
                     }
+                    
+                    simulationState.transactions.push({
+                        id: Date.now() + i,
+                        amount: parseFloat(amount.toFixed(2)),
+                        date: transactionDate,
+                        detected: isDetected,
+                        detectionDate: isDetected ? 
+                            new Date(transactionDate.getTime() + Math.random() * 30 * 24 * 60 * 60 * 1000) : null,
+                        detectionMethod: detectionMethod
+                    });
+                }
+                
+                // Update UI with results
+                displayResults(totalEvaded, totalDetected);
+                
+                // Show results section
+                document.querySelector('.simulation-results').style.display = 'block';
+            }
+            
+            function getBaseAmount(incomeLevel) {
+                switch(incomeLevel) {
+                    case 'low': return 5000;
+                    case 'medium': return 15000;
+                    case 'high': return 30000;
+                    default: return 10000;
                 }
             }
-        }
-    });
-}
-
-function renderTransactionList() {
-    const container = document.getElementById('transaction-list');
-    if (!container) return;
-    
-    if (simulationState.transactions.length === 0) {
-        container.innerHTML = '<p>No transactions generated</p>';
-        return;
-    }
-    
-    // Sort by date (newest first)
-    const sortedTransactions = [...simulationState.transactions].sort((a, b) => b.date - a.date);
-    
-    container.innerHTML = sortedTransactions.map(t => `
-        <div class="transaction-item">
-            <div>
-                <strong>${formatDate(t.date)}</strong>
-                <div class="transaction-method">${simulationState.selectedScenario} • $${t.amount.toLocaleString()}</div>
-            </div>
-            <div class="${t.detected ? 'transaction-detected' : 'transaction-undetected'}">
-                ${t.detected ? `Detected (${t.detectionMethod})` : 'Not detected'}
-            </div>
-        </div>
-    `).join('');
-}
-
-function formatDate(date) {
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-}
-
+            
+            function getDetectionProbability(scenario) {
+                const probabilities = {
+                    offshore: 0.65,
+                    underreport: 0.45,
+                    expenses: 0.55,
+                    crypto: 0.35
+                };
+                return probabilities[scenario] || 0.5;
+            }
+            
+            function getDetectionMethod(scenario) {
+                const methods = {
+                    offshore: ['CRS Data Match', 'Bank Leak Analysis', 'Whistleblower Tip'],
+                    underreport: ['Income Discrepancy', 'Third-Party Reporting', 'Audit Findings'],
+                    expenses: ['Expense Pattern Analysis', 'Supplier Verification', 'Industry Benchmarking'],
+                    crypto: ['Blockchain Analysis', 'Exchange Reporting', 'Wallet Identification']
+                };
+                
+                const availableMethods = methods[scenario] || ['Data Analysis', 'Automated Alert', 'Manual Review'];
+                return availableMethods[Math.floor(Math.random() * availableMethods.length)];
+            }
+            
+            function displayResults(totalEvaded, totalDetected) {
+                // Update stats
+                document.getElementById('attempts-count').textContent = simulationState.transactions.length;
+                document.getElementById('detected-count').textContent = simulationState.transactions.filter(t => t.detected).length;
+                document.getElementById('detection-rate-sim').textContent = `${Math.round((totalDetected / totalEvaded) * 100)}%`;
+                document.getElementById('amount-evaded').textContent = `$${totalEvaded.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
+                
+                // Render chart
+                renderSimulationChart();
+                
+                // Render transaction list
+                renderTransactionList();
+            }
+            
+            function renderSimulationChart() {
+                const ctx = document.getElementById('simulation-chart');
+                if (!ctx) return;
+                
+                // Destroy previous chart if exists
+                if (simulationState.chart) {
+                    simulationState.chart.destroy();
+                }
+                
+                // Group transactions by month
+                const monthlyData = {};
+                simulationState.transactions.forEach(t => {
+                    const monthYear = `${t.date.getFullYear()}-${t.date.getMonth()}`;
+                    if (!monthlyData[monthYear]) {
+                        monthlyData[monthYear] = {
+                            total: 0,
+                            detected: 0
+                        };
+                    }
+                    monthlyData[monthYear].total += t.amount;
+                    if (t.detected) {
+                        monthlyData[monthYear].detected += t.amount;
+                    }
+                });
+                
+                // Prepare chart data
+                const labels = Object.keys(monthlyData).sort().map(key => {
+                    const [year, month] = key.split('-');
+                    return new Date(year, month).toLocaleDateString(undefined, {month: 'short', year: 'numeric'});
+                });
+                
+                const totalData = Object.keys(monthlyData).sort().map(key => monthlyData[key].total);
+                const detectedData = Object.keys(monthlyData).sort().map(key => monthlyData[key].detected);
+                
+                simulationState.chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Total Evaded',
+                                data: totalData,
+                                backgroundColor: 'rgba(52, 152, 219, 0.7)'
+                            },
+                            {
+                                label: 'Detected',
+                                data: detectedData,
+                                backgroundColor: 'rgba(46, 204, 113, 0.7)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Amount ($)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Month'
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: $${context.raw.toLocaleString()}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function renderTransactionList() {
+                const container = document.getElementById('transaction-list');
+                if (!container) return;
+                
+                if (simulationState.transactions.length === 0) {
+                    container.innerHTML = '<p>No transactions generated</p>';
+                    return;
+                }
+                
+                // Sort by date (newest first)
+                const sortedTransactions = [...simulationState.transactions].sort((a, b) => b.date - a.date);
+                
+                container.innerHTML = sortedTransactions.map(t => `
+                    <div class="transaction-item">
+                        <div>
+                            <strong>${formatDate(t.date)}</strong>
+                            <div class="transaction-method">${simulationState.selectedScenario} • $${t.amount.toLocaleString()}</div>
+                        </div>
+                        <div class="${t.detected ? 'transaction-detected' : 'transaction-undetected'}">
+                            ${t.detected ? `Detected (${t.detectionMethod})` : 'Not detected'}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            function formatDate(date) {
+                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            }
+        });
 // Set up navigation between sections
 function setupNavigation() {
     navLinks.forEach(link => {
