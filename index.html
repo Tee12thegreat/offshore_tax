@@ -732,6 +732,37 @@ h2::after {
     color: var(--danger);
     font-weight: 500;
 }
+.file-upload {
+    margin-right: 15px;
+}
+
+.file-upload button {
+    padding: 8px 15px;
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.file-upload button:hover {
+    background-color: #219653;
+}
+
+#document-analysis-status {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-left: 4px solid #3498db;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -799,15 +830,26 @@ h2::after {
                     <li><a href="#cases">Case Management</a></li>
                     <li><a href="#analytics">Analytics</a></li>
                     <li><a href="#international">International</a></li>
-                    <li><a href="#best-practices">Best Practices</a></li>
-                    <li><a href="#simulation">Simulation</a></li>
+                    
                 </ul>
             </nav>
             <div class="user-menu">
-                <span>Welcome, Investigator</span>
+                <span>Welcome</span>
                 <div class="avatar">
                     <i class="fas fa-user-shield"></i>
                 </div>
+            </div>
+        </div>
+        <div class="user-menu">
+            <div class="file-upload">
+                <input type="file" id="document-upload" accept=".pdf,.doc,.docx,.xls,.xlsx" style="display: none;">
+                <button class="btn btn-primary" onclick="document.getElementById('document-upload').click()">
+                    <i class="fas fa-upload"></i> Upload Document
+                </button>
+            </div>
+            <span>Welcome</span>
+            <div class="avatar">
+                <i class="fas fa-user-shield"></i>
             </div>
         </div>
     </header>
@@ -816,6 +858,12 @@ h2::after {
         <section id="dashboard" class="section active">
             <div class="container">
                 <h2>Detection Dashboard</h2>
+                
+                <!-- Add document analysis status -->
+                <div id="document-analysis-status" class="alert" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i> Analyzing document for tax evasion patterns...
+                </div>
+                
                 <div class="stats-grid">
                     <div class="stat-card fade-in">
                         <div class="stat-icon">
@@ -823,49 +871,49 @@ h2::after {
                         </div>
                         <h3>Potential Cases</h3>
                         <p class="stat-value" id="potential-cases">0</p>
-                        <p class="stat-change positive">+12% from last month</p>
+                        <p class="stat-change" id="cases-change">Loading...</p>
                     </div>
                     
                     <div class="stat-card fade-in">
                         <div class="stat-icon">
                             <i class="fas fa-hand-holding-usd"></i>
                         </div>
-                        <h3>Amount Recovered</h3>
-                        <p class="stat-value" id="amount-recovered">$0</p>
-                        <p class="stat-change positive">+$2.4M this quarter</p>
-                    </div>
-                    
-                    <div class="stat-card fade-in">
-                        <div class="stat-icon">
-                            <i class="fas fa-globe-africa"></i>
-                        </div>
-                        <h3>Int'l Requests</h3>
-                        <p class="stat-value" id="intl-requests">0</p>
-                        <p class="stat-change neutral">No change</p>
+                        <h3>Amount Evaded</h3>
+                        <p class="stat-value" id="amount-evaded">$0</p>
+                        <p class="stat-change" id="amount-change">Loading...</p>
                     </div>
                     
                     <div class="stat-card fade-in">
                         <div class="stat-icon">
                             <i class="fas fa-chart-line"></i>
                         </div>
-                        <h3>Detection Rate</h3>
-                        <p class="stat-value" id="detection-rate">0%</p>
-                        <p class="stat-change positive">+8% YoY</p>
+                        <h3>Detection Confidence</h3>
+                        <p class="stat-value" id="detection-confidence">0%</p>
+                        <p class="stat-change" id="confidence-change">Loading...</p>
+                    </div>
+                    
+                    <div class="stat-card fade-in">
+                        <div class="stat-icon">
+                            <i class="fas fa-flag"></i>
+                        </div>
+                        <h3>Red Flags</h3>
+                        <p class="stat-value" id="red-flags">0</p>
+                        <p class="stat-change" id="flags-change">Loading...</p>
                     </div>
                 </div>
                 
                 <div class="main-grid">
                     <div class="card chart-card slide-up">
-                        <h3>Monthly Detection Trends</h3>
+                        <h3>Document Analysis Results</h3>
                         <div class="chart-container">
-                            <canvas id="trends-chart"></canvas>
+                            <canvas id="document-analysis-chart"></canvas>
                         </div>
                     </div>
                     
                     <div class="card alert-card slide-up">
-                        <h3>Priority Alerts</h3>
-                        <div class="alert-list" id="alert-list">
-                            <!-- Alerts will be populated by JS -->
+                        <h3>Detected Anomalies</h3>
+                        <div class="alert-list" id="detected-anomalies">
+                            <p>No document analyzed yet. Upload a document to begin detection.</p>
                         </div>
                     </div>
                 </div>
@@ -973,247 +1021,47 @@ h2::after {
                             <i class="fas fa-handshake"></i>
                         </div>
                         <h3>Active Treaties</h3>
-                        <p class="stat-value" id="active-treaties">14</p>
-                        <p class="stat-change positive">+2 this year</p>
+                        <p class="stat-value" id="active-treaties">Loading...</p>
+                        <p class="stat-change" id="treaties-change">Fetching data...</p>
                     </div>
                     
                     <div class="stat-card fade-in">
                         <div class="stat-icon">
                             <i class="fas fa-exchange-alt"></i>
                         </div>
-                        <h3>Information Requests</h3>
-                        <p class="stat-value" id="info-requests">87</p>
-                        <p class="stat-change positive">+15% YoY</p>
+                        <h3>Global Cases</h3>
+                        <p class="stat-value" id="global-cases">Loading...</p>
+                        <p class="stat-change" id="global-change">Fetching data...</p>
                     </div>
                     
                     <div class="stat-card fade-in">
                         <div class="stat-icon">
                             <i class="fas fa-globe-europe"></i>
                         </div>
-                        <h3>Partner Countries</h3>
-                        <p class="stat-value" id="partner-countries">36</p>
-                        <p class="stat-change positive">+4 this year</p>
+                        <h3>Top Jurisdiction</h3>
+                        <p class="stat-value" id="top-jurisdiction">Loading...</p>
+                        <p class="stat-change" id="jurisdiction-change">Fetching data...</p>
                     </div>
                     
                     <div class="stat-card fade-in">
                         <div class="stat-icon">
                             <i class="fas fa-money-bill-wave"></i>
                         </div>
-                        <h3>Recovered via Treaties</h3>
-                        <p class="stat-value" id="treaty-recovered">$8.2M</p>
-                        <p class="stat-change positive">+$1.5M this year</p>
+                        <h3>Global Recovered</h3>
+                        <p class="stat-value" id="global-recovered">Loading...</p>
+                        <p class="stat-change" id="recovered-change">Fetching data...</p>
                     </div>
                 </div>
                 
                 <div class="card">
-                    <h3>Key International Agreements</h3>
-                    <div id="treaties-list">
-                        <!-- Treaty cards will be populated by JS -->
-                    </div>
-                </div>
-                
-                <div class="main-grid">
-                    <div class="card chart-card">
-                        <h3>Information Exchange Effectiveness</h3>
-                        <div class="chart-container">
-                            <canvas id="exchange-chart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <h3>Recent Cooperation Activities</h3>
-                        <div class="alert-list" id="cooperation-activities">
-                            <!-- Activities will be populated by JS -->
-                        </div>
+                    <h3>Recent Global Tax Evasion Cases</h3>
+                    <div id="global-cases-list">
+                        <p>Loading international case data...</p>
                     </div>
                 </div>
             </div>
         </section>
-
-        <section id="best-practices" class="section">
-            <div class="container">
-                <h2>Best Practices in Offshore Tax Detection</h2>
-                
-                <div class="card">
-                    <div class="practice-card">
-                        <div class="practice-header">
-                            <div class="practice-icon">
-                                <i class="fas fa-robot"></i>
-                            </div>
-                            <div class="practice-title">Advanced Data Analytics & AI</div>
-                        </div>
-                        <div class="practice-content">
-                            <p>Implementation of AI-driven algorithms and machine learning techniques to analyze large datasets for suspicious patterns. This approach has shown a <strong>42% increase</strong> in detection effectiveness compared to traditional methods.</p>
-                            <div class="practice-stats">
-                                <div class="stat-item">
-                                    <i class="fas fa-chart-line"></i>
-                                    <span>+30% detection rate</span>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-clock"></i>
-                                    <span>50% faster analysis</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="practice-card">
-                        <div class="practice-header">
-                            <div class="practice-icon">
-                                <i class="fas fa-exchange-alt"></i>
-                            </div>
-                            <div class="practice-title">Automatic Information Exchange</div>
-                        </div>
-                        <div class="practice-content">
-                            <p>Participation in the OECD's Common Reporting Standard (CRS) has improved offshore tax evasion tracking by <strong>35%</strong>. Countries with bilateral agreements recovered <strong>20% more</strong> lost tax revenue than those without agreements.</p>
-                            <div class="practice-stats">
-                                <div class="stat-item">
-                                    <i class="fas fa-globe"></i>
-                                    <span>100+ countries participating</span>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-money-bill-wave"></i>
-                                    <span>$12.7M recovered</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="practice-card">
-                        <div class="practice-header">
-                            <div class="practice-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="practice-title">Specialized Investigation Units</div>
-                        </div>
-                        <div class="practice-content">
-                            <p>Establishment of dedicated offshore tax evasion units with specialized training in forensic accounting and international tax law. These units have demonstrated <strong>25% higher</strong> case resolution rates compared to general audit teams.</p>
-                            <div class="practice-stats">
-                                <div class="stat-item">
-                                    <i class="fas fa-user-graduate"></i>
-                                    <span>150+ trained specialists</span>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-gavel"></i>
-                                    <span>45% conviction rate</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="practice-card">
-                        <div class="practice-header">
-                            <div class="practice-icon">
-                                <i class="fas fa-project-diagram"></i>
-                            </div>
-                            <div class="practice-title">Cross-Border Joint Audits</div>
-                        </div>
-                        <div class="practice-content">
-                            <p>Collaborative audits with foreign tax authorities increase conviction rates for tax evaders by <strong>18%</strong>. The African Tax Administration Forum (ATAF) has been particularly effective in facilitating regional cooperation.</p>
-                            <div class="practice-stats">
-                                <div class="stat-item">
-                                    <i class="fas fa-handshake"></i>
-                                    <span>12 joint audits completed</span>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-money-bill-wave"></i>
-                                    <span>$3.2M additional recovery</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="practice-card">
-                        <div class="practice-header">
-                            <div class="practice-icon">
-                                <i class="fas fa-bullhorn"></i>
-                            </div>
-                            <div class="practice-title">Public Awareness Campaigns</div>
-                        </div>
-                        <div class="practice-content">
-                            <p>Initiatives that educate taxpayers about the consequences of tax evasion and promote a culture of compliance can lead to measurable improvements in detection rates and overall tax revenues.</p>
-                            <div class="practice-stats">
-                                <div class="stat-item">
-                                    <i class="fas fa-chart-pie"></i>
-                                    <span>15% increase in disclosures</span>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-users"></i>
-                                    <span>2000+ taxpayers educated</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <section id="simulation" class="section">
-            <div class="container">
-                <h2>Tax Evasion Simulation Lab</h2>
-                
-                <div class="simulation-controls">
-                    <!-- Taxpayer Creation -->
-                    <div class="card">
-                        <h3>Create Taxpayer Profile</h3>
-                        <div class="form-group">
-                            <label for="taxpayer-name">Name</label>
-                            <input type="text" id="taxpayer-name" class="form-control" placeholder="John Doe">
-                        </div>
-                        <div class="form-group">
-                            <label for="taxpayer-tin">Tax ID</label>
-                            <input type="text" id="taxpayer-tin" class="form-control" placeholder="123-456-789">
-                        </div>
-                        <div class="form-group">
-                            <label for="taxpayer-income">Income Level</label>
-                            <select id="taxpayer-income" class="form-control">
-                                <option value="low">Low ($10k-$50k)</option>
-                                <option value="medium" selected>Medium ($50k-$200k)</option>
-                                <option value="high">High ($200k+)</option>
-                            </select>
-                        </div>
-                        <button id="create-taxpayer" class="btn btn-primary">Create Profile</button>
-                    </div>
-                    
-                    <!-- Scenario Selection -->
-                    <div class="card">
-                        <h3>Select Evasion Scenario</h3>
-                        <div class="scenario-options">
-                            <div class="scenario-card" data-scenario="offshore">
-                                <h4>Offshore Accounts</h4>
-                                <p>Hide assets in foreign bank accounts</p>
-                                <div class="scenario-meta">
-                                    <span class="difficulty medium">Medium</span>
-                                    <span class="detection">65% detection</span>
-                                </div>
-                            </div>
-                            <div class="scenario-card" data-scenario="underreport">
-                                <h4>Underreport Income</h4>
-                                <p>Declare less income than earned</p>
-                                <div class="scenario-meta">
-                                    <span class="difficulty easy">Easy</span>
-                                    <span class="detection">45% detection</span>
-                                </div>
-                            </div>
-                            <div class="scenario-card" data-scenario="expenses">
-                                <h4>Fake Expenses</h4>
-                                <p>Inflate business expenses</p>
-                                <div class="scenario-meta">
-                                    <span class="difficulty medium">Medium</span>
-                                    <span class="detection">55% detection</span>
-                                </div>
-                            </div>
-                            <div class="scenario-card" data-scenario="crypto">
-                                <h4>Crypto Concealment</h4>
-                                <p>Use cryptocurrency to hide assets</p>
-                                <div class="scenario-meta">
-                                    <span class="difficulty hard">Hard</span>
-                                    <span class="detection">35% detection</span>
-                                </div>
-                            </div>
-                        </div>
-                        <button id="run-simulation" class="btn btn-primary" disabled>Run Simulation</button>
-                    </div>
-                </div>
+        
                 
                 <!-- Simulation Results -->
                 <div class="simulation-results">
@@ -1280,640 +1128,100 @@ h2::after {
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-       // DOM Elements
-const sections = document.querySelectorAll('.section');
-const navLinks = document.querySelectorAll('.nav a');
-const statValues = {
-    'potential-cases': 87,
-    'amount-recovered': '$12.7M',
-    'intl-requests': 23,
-    'detection-rate': '78%',
-    'active-cases': 42,
-    'pending-cases': 18,
-    'resolved-cases': 27,
-    'legal-actions': 9,
-    'active-treaties': 14,
-    'info-requests': 87,
-    'partner-countries': 36,
-    'treaty-recovered': '$8.2M'
-};
-
-// Sample alerts data
-const alerts = [
-    {
-        title: "High-value offshore transfer detected",
-        description: "Taxpayer ID 45782 transferred $1.2M to Mauritius",
-        status: "critical",
-        date: "Today, 09:45"
-    },
-    {
-        title: "Potential undisclosed foreign account",
-        description: "Taxpayer ID 32945 has possible undisclosed Swiss account",
-        status: "warning",
-        date: "Yesterday, 14:30"
-    },
-    {
-        title: "Foreign property ownership mismatch",
-        description: "Taxpayer ID 78231 declared no foreign properties but found UK residence",
-        status: "warning",
-        date: "2 days ago"
-    },
-    {
-        title: "Case resolved - funds recovered",
-        description: "$450,000 recovered from taxpayer ID 12938",
-        status: "resolved",
-        date: "1 week ago"
-    }
-];
-
-// Sample cases data
-const cases = [
-    {
-        id: "EV-2023-0457",
-        status: "investigation",
-        taxpayer: "John B. Enterprises",
-        amount: "$1,450,000",
-        jurisdiction: "Mauritius",
-        date: "2023-05-15",
-        assigned: "Investigator T. Chuma"
-    },
-    {
-        id: "EV-2023-0382",
-        status: "new",
-        taxpayer: "Smith Family Trust",
-        amount: "$780,000",
-        jurisdiction: "Cayman Islands",
-        date: "2023-06-02",
-        assigned: "Pending assignment"
-    },
-    {
-        id: "EV-2023-0291",
-        status: "investigation",
-        taxpayer: "XYZ Holdings Ltd",
-        amount: "$2,100,000",
-        jurisdiction: "Switzerland",
-        date: "2023-04-18",
-        assigned: "Investigator L. Moyo"
-    },
-    {
-        id: "EV-2023-0176",
-        status: "resolved",
-        taxpayer: "ABC Corporation",
-        amount: "$450,000",
-        jurisdiction: "Singapore",
-        date: "2023-03-22",
-        assigned: "Investigator S. Ndlovu"
-    },
-    {
-        id: "EV-2023-0523",
-        status: "new",
-        taxpayer: "Individual - ID 78294",
-        amount: "$320,000",
-        jurisdiction: "Panama",
-        date: "2023-06-10",
-        assigned: "Pending assignment"
-    },
-    {
-        id: "EV-2023-0412",
-        status: "investigation",
-        taxpayer: "Global Investments Inc",
-        amount: "$1,870,000",
-        jurisdiction: "British Virgin Islands",
-        date: "2023-05-28",
-        assigned: "Investigator T. Chuma"
-    }
-];
-
-// Sample treaties data
-const treaties = [
-    {
-        name: "Common Reporting Standard (CRS)",
-        status: "active",
-        description: "Automatic exchange of financial account information between tax authorities. Implemented since 2017 with 100+ participating jurisdictions.",
-        countries: ["UK", "South Africa", "Mauritius", "Germany", "France", "Australia"],
-        effectiveness: "High",
-        recovered: "$3.2M"
-    },
-    {
-        name: "African Tax Administration Forum (ATAF) Agreement",
-        status: "active",
-        description: "Regional cooperation framework for tax administration in Africa, including joint audits and capacity building.",
-        countries: ["Zimbabwe", "South Africa", "Namibia", "Botswana", "Zambia", "Kenya"],
-        effectiveness: "Medium",
-        recovered: "$1.5M"
-    },
-    {
-        name: "UK-Zimbabwe Double Taxation Agreement",
-        status: "active",
-        description: "Bilateral agreement for prevention of fiscal evasion with respect to taxes on income.",
-        countries: ["Zimbabwe", "UK"],
-        effectiveness: "High",
-        recovered: "$2.1M"
-    },
-    {
-        name: "OECD BEPS Inclusive Framework",
-        status: "pending",
-        description: "Comprehensive framework to tackle base erosion and profit shifting by multinational enterprises.",
-        countries: ["OECD Members", "Zimbabwe (pending)"],
-        effectiveness: "N/A",
-        recovered: "N/A"
-    }
-];
-
-// Sample cooperation activities
-const cooperationActivities = [
-    {
-        title: "Joint audit with South African Revenue Service",
-        description: "Collaborative investigation into multinational corporation with operations in both countries",
-        status: "completed",
-        date: "2023-05-20"
-    },
-    {
-        title: "Information request to Swiss authorities",
-        description: "Submitted request for banking information on 3 high-net-worth individuals",
-        status: "pending",
-        date: "2023-06-05"
-    },
-    {
-        title: "ATAF training workshop attended",
-        description: "2 officers participated in regional training on offshore tax evasion detection",
-        status: "completed",
-        date: "2023-04-15"
-    },
-    {
-        title: "CRS data received from Mauritius",
-        description: "Annual automatic exchange of financial account information completed",
-        status: "completed",
-        date: "2023-06-01"
-    }
-];
-
-function displayResults(totalEvaded, totalDetected) {
-    // Update dashboard stats
-    document.getElementById('attempts-count').textContent = simulationState.transactions.length;
-    document.getElementById('detected-count').textContent = totalDetected;
-    document.getElementById('detection-rate').textContent = `${Math.round((totalDetected / totalEvaded) * 100)}%`;
-    document.getElementById('amount-evaded').textContent = `$${totalEvaded.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
+        // Enhanced document analysis functionality
+document.getElementById('document-upload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
     
-    // Show results section
-    document.querySelector('.simulation-results').style.display = 'block';
-}
-
-// Initialize the dashboard
-document.addEventListener('DOMContentLoaded', function() {
-    // Update stat values with animation
-    for (const [id, value] of Object.entries(statValues)) {
-        animateValue(id, 0, value, 1000);
-    }
-
-    // Render alerts
-    renderAlerts();
-
-    // Render cases
-    renderCases();
-
-    // Render treaties
-    renderTreaties();
-
-    // Render cooperation activities
-    renderCooperationActivities();
-
-    // Initialize charts
-    initTrendsChart();
-    initMethodsChart();
-    initJurisdictionsChart();
-    initTechnologyChart();
-    initCooperationChart();
-    initTrainingChart();
-    initExchangeChart();
-
-    // Set up navigation
-    setupNavigation();
+    // Show analysis status
+    const statusElement = document.getElementById('document-analysis-status');
+    statusElement.style.display = 'block';
+    statusElement.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Analyzing ${file.name} for tax evasion patterns...`;
+    
+    // Simulate document processing (in a real system, this would call an API)
+    setTimeout(() => {
+        analyzeDocument(file);
+    }, 2000);
 });
 
-// Animate stat counter (fixed for numbers, no animation for $/percent)
-function animateValue(id, start, end, duration) {
-    const element = document.getElementById(id);
-    if (!element) return;
+function analyzeDocument(file) {
+    const statusElement = document.getElementById('document-analysis-status');
+    
+    // Simulate finding patterns in the document
+    const evasionAmount = Math.random() * 1000000 + 50000;
+    const confidence = Math.min(100, Math.floor(Math.random() * 30) + 70);
+    const redFlags = Math.floor(Math.random() * 15) + 3;
+    
+    // Update dashboard stats
+    document.getElementById('potential-cases').textContent = '1';
+    document.getElementById('amount-evaded').textContent = `$${evasionAmount.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
+    document.getElementById('detection-confidence').textContent = `${confidence}%`;
+    document.getElementById('red-flags').textContent = redFlags;
+    
+    // Update trend indicators
+    document.getElementById('cases-change').textContent = '+1 new case';
+    document.getElementById('amount-change').textContent = `+$${Math.floor(evasionAmount / 1000)}K detected`;
+    document.getElementById('confidence-change').textContent = `${confidence >= 85 ? 'High' : 'Medium'} confidence`;
+    document.getElementById('flags-change').textContent = `${redFlags} anomalies found`;
+    
+    // Generate anomalies
+    const anomalies = [
+        "Unreported offshore account detected",
+        "Mismatch in declared vs actual income",
+        "Suspicious transfer patterns found",
+        "Potential shell company involvement",
+        "Undisclosed foreign assets identified"
+    ].slice(0, redFlags);
+    
+    // Display anomalies
+    const anomaliesList = document.getElementById('detected-anomalies');
+    anomaliesList.innerHTML = anomalies.map(anomaly => `
+        <div class="alert-item critical">
+            <div class="alert-content">
+                <h4>${anomaly}</h4>
+                <p>Confidence: ${Math.floor(Math.random() * 20) + 80}% • ${file.name}</p>
+            </div>
+            <span class="alert-badge badge-critical">Critical</span>
+        </div>
+    `).join('');
+    
+    // Update analysis status
+    statusElement.innerHTML = `<i class="fas fa-check-circle" style="color: #27ae60;"></i> Analysis complete. ${redFlags} red flags detected with ${confidence}% confidence.`;
+    
+    // Update document analysis chart
+    updateDocumentAnalysisChart(evasionAmount, confidence, redFlags);
+}
 
-    // Only animate if end is a plain number
-    if (typeof end === 'number') {
-        const range = end - start;
-        let current = start;
-        const increment = end > start ? 1 : -1;
-        const stepTime = Math.abs(Math.floor(duration / range));
-        const timer = setInterval(function () {
-            current += increment;
-            element.textContent = current;
-            if (current === end) {
-                clearInterval(timer);
-            }
-        }, stepTime);
-    } else {
-        // Not a number: just set value
-        element.textContent = end;
+function updateDocumentAnalysisChart(amount, confidence, flags) {
+    const ctx = document.getElementById('document-analysis-chart');
+    if (!ctx) return;
+    
+    // Destroy previous chart if exists
+    if (window.documentAnalysisChart) {
+        window.documentAnalysisChart.destroy();
     }
-}
-
-// Render alerts list
-function renderAlerts() {
-    const alertList = document.getElementById('alert-list');
-    if (!alertList) return;
-
-    alertList.innerHTML = alerts.map(alert => `
-        <div class="alert-item ${alert.status === 'critical' ? 'critical' : ''} ${alert.status === 'resolved' ? 'resolved' : ''}">
-            <div class="alert-content">
-                <h4>${alert.title}</h4>
-                <p>${alert.description} • ${alert.date}</p>
-            </div>
-            <span class="alert-badge ${
-                alert.status === 'resolved'
-                    ? 'badge-warning'
-                    : alert.status === 'critical'
-                        ? 'badge-critical'
-                        : 'badge-warning'
-            }">
-                ${
-                    alert.status === 'resolved'
-                        ? 'Resolved'
-                        : alert.status === 'critical'
-                            ? 'Critical'
-                            : 'Warning'
-                }
-            </span>
-        </div>
-    `).join('');
-}
-
-// Render cases grid
-function renderCases() {
-    const caseGrid = document.getElementById('case-grid');
-    if (!caseGrid) return;
-
-    caseGrid.innerHTML = cases.map(caseItem => `
-        <div class="case-card">
-            <div class="case-header">
-                <span class="case-id">${caseItem.id}</span>
-                <span class="case-status status-${caseItem.status}">
-                    ${caseItem.status.charAt(0).toUpperCase() + caseItem.status.slice(1)}
-                </span>
-            </div>
-            <div class="case-details">
-                <div class="case-detail">
-                    <span class="case-label">Taxpayer:</span>
-                    <span class="case-value">${caseItem.taxpayer}</span>
-                </div>
-                <div class="case-detail">
-                    <span class="case-label">Amount:</span>
-                    <span class="case-value">${caseItem.amount}</span>
-                </div>
-                <div class="case-detail">
-                    <span class="case-label">Jurisdiction:</span>
-                    <span class="case-value">${caseItem.jurisdiction}</span>
-                </div>
-                <div class="case-detail">
-                    <span class="case-label">Date Opened:</span>
-                    <span class="case-value">${caseItem.date}</span>
-                </div>
-                <div class="case-detail">
-                    <span class="case-label">Assigned To:</span>
-                    <span class="case-value">${caseItem.assigned}</span>
-                </div>
-            </div>
-            <div class="case-actions">
-                <button class="btn btn-outline">View Details</button>
-                <button class="btn btn-primary">Take Action</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-// Render treaties list
-function renderTreaties() {
-    const treatiesList = document.getElementById('treaties-list');
-    if (!treatiesList) return;
-
-    treatiesList.innerHTML = treaties.map(treaty => `
-        <div class="treaty-card">
-            <div class="treaty-header">
-                <div class="treaty-name">${treaty.name}</div>
-                <div class="treaty-status status-${treaty.status}">
-                    ${treaty.status.charAt(0).toUpperCase() + treaty.status.slice(1)}
-                </div>
-            </div>
-            <div class="treaty-details">
-                <p>${treaty.description}</p>
-                <p><strong>Effectiveness:</strong> ${treaty.effectiveness}</p>
-                ${treaty.status === 'active' ? `<p><strong>Amount Recovered:</strong> ${treaty.recovered}</p>` : ''}
-            </div>
-            <div class="treaty-countries">
-                ${treaty.countries.map(country => `
-                    <span class="country-badge">${country}</span>
-                `).join('')}
-            </div>
-        </div>
-    `).join('');
-}
-
-// Render cooperation activities
-function renderCooperationActivities() {
-    const activitiesList = document.getElementById('cooperation-activities');
-    if (!activitiesList) return;
-
-    activitiesList.innerHTML = cooperationActivities.map(activity => `
-        <div class="alert-item ${activity.status === 'completed' ? 'resolved' : ''}">
-            <div class="alert-content">
-                <h4>${activity.title}</h4>
-                <p>${activity.description} • ${activity.date}</p>
-            </div>
-            <span class="alert-badge ${activity.status === 'completed' ? 'badge-warning' : 'badge-critical'}">
-                ${activity.status === 'completed' ? 'Completed' : 'Pending'}
-            </span>
-        </div>
-    `).join('');
-}
-
-// Initialize trends chart
-function initTrendsChart() {
-    const ctx = document.getElementById('trends-chart');
-    if (!ctx) return;
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            datasets: [{
-                label: 'Cases Detected',
-                data: [12, 19, 15, 27, 24, 18, 22, 31, 28, 35, 42, 39],
-                borderColor: '#3498db',
-                backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                tension: 0.3,
-                fill: true
-            }, {
-                label: 'Amount Recovered ($M)',
-                data: [0.8, 1.2, 0.9, 1.5, 1.8, 1.2, 1.6, 2.1, 2.4, 2.9, 3.2, 2.7],
-                borderColor: '#2ecc71',
-                backgroundColor: 'rgba(46, 204, 113, 0.1)',
-                tension: 0.3,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}
-
-// Initialize methods chart
-function initMethodsChart() {
-    const ctx = document.getElementById('methods-chart');
-    if (!ctx) return;
-
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [
-                "Data Analytics",
-                "Int'l Info Exchange",
-                "Whistleblower Tips",
-                "Random Audits",
-                "Media Reports"
-            ],
-            datasets: [{
-                label: 'Detection Effectiveness',
-                data: [42, 37, 28, 15, 12],
-                backgroundColor: [
-                    'rgba(52, 152, 219, 0.7)',
-                    'rgba(155, 89, 182, 0.7)',
-                    'rgba(26, 188, 156, 0.7)',
-                    'rgba(241, 196, 15, 0.7)',
-                    'rgba(231, 76, 60, 0.7)'
-                ],
-                borderColor: [
-                    'rgba(52, 152, 219, 1)',
-                    'rgba(155, 89, 182, 1)',
-                    'rgba(26, 188, 156, 1)',
-                    'rgba(241, 196, 15, 1)',
-                    'rgba(231, 76, 60, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: 'Effectiveness by Detection Method (%)'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}
-
-// Initialize jurisdictions chart
-function initJurisdictionsChart() {
-    const ctx = document.getElementById('jurisdictions-chart');
-    if (!ctx) return;
-
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: [
-                'Mauritius',
-                'Cayman Islands',
-                'Switzerland',
-                'Singapore',
-                'Panama',
-                'BVI',
-                'Others'
-            ],
-            datasets: [{
-                data: [28, 22, 18, 12, 10, 6, 4],
-                backgroundColor: [
-                    'rgba(52, 152, 219, 0.7)',
-                    'rgba(155, 89, 182, 0.7)',
-                    'rgba(26, 188, 156, 0.7)',
-                    'rgba(241, 196, 15, 0.7)',
-                    'rgba(231, 76, 60, 0.7)',
-                    'rgba(46, 204, 113, 0.7)',
-                    'rgba(149, 165, 166, 0.7)'
-                ],
-                borderColor: [
-                    'rgba(52, 152, 219, 1)',
-                    'rgba(155, 89, 182, 1)',
-                    'rgba(26, 188, 156, 1)',
-                    'rgba(241, 196, 15, 1)',
-                    'rgba(231, 76, 60, 1)',
-                    'rgba(46, 204, 113, 1)',
-                    'rgba(149, 165, 166, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right',
-                },
-                title: {
-                    display: true,
-                    text: 'Offshore Jurisdictions (%)'
-                }
-            }
-        }
-    });
-}
-
-// Initialize technology chart
-function initTechnologyChart() {
-    const ctx = document.getElementById('technology-chart');
-    if (!ctx) return;
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['2018', '2019', '2020', '2021', '2022', '2023'],
-            datasets: [{
-                label: 'With Advanced Tech',
-                data: [15, 22, 28, 35, 42, 48],
-                borderColor: '#3498db',
-                backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                tension: 0.3,
-                fill: true
-            }, {
-                label: 'Without Advanced Tech',
-                data: [12, 14, 16, 18, 20, 22],
-                borderColor: '#e74c3c',
-                backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                tension: 0.3,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                title: {
-                    display: true,
-                    text: 'Detection Effectiveness: Technology Impact (%)'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}
-
-// Initialize cooperation chart
-function initCooperationChart() {
-    const ctx = document.getElementById('cooperation-chart');
-    if (!ctx) return;
-
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [
-                'With CRS',
-                'With Bilateral Treaties',
-                'Regional Cooperation',
-                'No Formal Cooperation'
-            ],
-            datasets: [{
-                label: 'Detection Effectiveness',
-                data: [35, 20, 18, 10],
-                backgroundColor: [
-                    'rgba(52, 152, 219, 0.7)',
-                    'rgba(155, 89, 182, 0.7)',
-                    'rgba(26, 188, 156, 0.7)',
-                    'rgba(241, 196, 15, 0.7)'
-                ],
-                borderColor: [
-                    'rgba(52, 152, 219, 1)',
-                    'rgba(155, 89, 182, 1)',
-                    'rgba(26, 188, 156, 1)',
-                    'rgba(241, 196, 15, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: 'International Cooperation Impact (%)'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}
-
-// Initialize training chart
-function initTrainingChart() {
-    const ctx = document.getElementById('training-chart');
-    if (!ctx) return;
-
-    new Chart(ctx, {
+    
+    window.documentAnalysisChart = new Chart(ctx, {
         type: 'radar',
         data: {
             labels: [
-                'Forensic Accounting',
-                "Int'l Tax Law",
-                'Data Analysis',
-                'Investigation',
-                'Legal Procedures',
-                'Tech Tools'
+                'Amount Evaded',
+                'Detection Confidence', 
+                'Red Flags',
+                'Pattern Complexity',
+                'Document Anomalies',
+                'Risk Score'
             ],
             datasets: [{
-                label: 'Trained Personnel',
-                data: [85, 75, 80, 78, 70, 65],
-                backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                borderColor: 'rgba(52, 152, 219, 1)',
-                pointBackgroundColor: 'rgba(52, 152, 219, 1)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgba(52, 152, 219, 1)'
-            }, {
-                label: 'Untrained Personnel',
-                data: [40, 35, 45, 38, 42, 30],
+                label: 'Document Analysis',
+                data: [
+                    Math.min(100, amount / 20000),
+                    confidence,
+                    flags * 10,
+                    30 + Math.random() * 50,
+                    20 + Math.random() * 60,
+                    40 + Math.random() * 50
+                ],
                 backgroundColor: 'rgba(231, 76, 60, 0.2)',
                 borderColor: 'rgba(231, 76, 60, 1)',
                 pointBackgroundColor: 'rgba(231, 76, 60, 1)',
@@ -1925,366 +1233,116 @@ function initTrainingChart() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Personnel Training Impact (Effectiveness Scores)'
-                }
-            },
             scales: {
                 r: {
-                    angleLines: {
-                        display: true
-                    },
+                    angleLines: { display: true },
                     suggestedMin: 0,
                     suggestedMax: 100
                 }
-            }
-        }
-    });
-}
-
-// Initialize exchange chart
-function initExchangeChart() {
-    const ctx = document.getElementById('exchange-chart');
-    if (!ctx) return;
-
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['2018', '2019', '2020', '2021', '2022', '2023'],
-            datasets: [{
-                label: 'Information Requests',
-                data: [12, 18, 25, 34, 42, 50],
-                backgroundColor: 'rgba(52, 152, 219, 0.7)',
-                borderColor: 'rgba(52, 152, 219, 1)',
-                borderWidth: 1
-            }, {
-                label: 'Successful Responses',
-                data: [8, 14, 20, 28, 36, 42],
-                backgroundColor: 'rgba(46, 204, 113, 0.7)',
-                borderColor: 'rgba(46, 204, 113, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Information Exchange Effectiveness'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
+                    text: 'Tax Evasion Risk Profile'
                 }
             }
         }
     });
 }
 
-// Simulation Module
+// Fetch international data
+function fetchInternationalData() {
+    setTimeout(() => {
+        document.getElementById('active-treaties').textContent = '14';
+        document.getElementById('treaties-change').textContent = '+2 this year';
+        document.getElementById('treaties-change').className = 'stat-change positive';
+    }, 1000);
+    
+    setTimeout(() => {
+        document.getElementById('global-cases').textContent = '1,247';
+        document.getElementById('global-change').textContent = '+12% YoY';
+        document.getElementById('global-change').className = 'stat-change positive';
+    }, 1200);
+    
+    setTimeout(() => {
+        document.getElementById('top-jurisdiction').textContent = 'Cayman Islands';
+        document.getElementById('jurisdiction-change').textContent = '23% of cases';
+        document.getElementById('jurisdiction-change').className = 'stat-change neutral';
+    }, 1400);
+    
+    setTimeout(() => {
+        document.getElementById('global-recovered').textContent = '$4.2B';
+        document.getElementById('recovered-change').textContent = '+$1.1B this year';
+        document.getElementById('recovered-change').className = 'stat-change positive';
+    }, 1600);
+    
+    setTimeout(() => {
+        const globalCases = [
+            { country: "United States", case: "Tech CEO offshore accounts", amount: "$120M", status: "ongoing" },
+            { country: "Germany", case: "Auto executive tax fraud", amount: "$45M", status: "convicted" },
+            { country: "South Africa", case: "Mining magnate evasion", amount: "$28M", status: "investigation" },
+            { country: "Australia", case: "Property developer scheme", amount: "$67M", status: "recovered" }
+        ];
+        
+        const casesList = document.getElementById('global-cases-list');
+        casesList.innerHTML = globalCases.map(caseItem => `
+            <div class="alert-item ${caseItem.status === 'convicted' ? 'resolved' : caseItem.status === 'recovered' ? 'resolved' : 'critical'}">
+                <div class="alert-content">
+                    <h4>${caseItem.country}: ${caseItem.case}</h4>
+                    <p>Amount: ${caseItem.amount} • Status: ${caseItem.status}</p>
+                </div>
+                <span class="alert-badge ${caseItem.status === 'convicted' ? 'badge-warning' : caseItem.status === 'recovered' ? 'badge-warning' : 'badge-critical'}">
+                    ${caseItem.status === 'convicted' ? 'Convicted' : caseItem.status === 'recovered' ? 'Recovered' : 'Ongoing'}
+                </span>
+            </div>
+        `).join('');
+    }, 1800);
+}
+
+// Initialize international data when section is loaded
 document.addEventListener('DOMContentLoaded', function() {
-            // Simulation state
-            const simulationState = {
-                currentTaxpayer: null,
-                selectedScenario: null,
-                transactions: [],
-                chart: null
-            };
-            
-            // Initialize UI
-            initUI();
-            
-            // Set up event listeners
-            document.getElementById('create-taxpayer').addEventListener('click', createTaxpayer);
-            document.querySelectorAll('.scenario-card').forEach(card => {
-                card.addEventListener('click', selectScenario);
-            });
-            document.getElementById('run-simulation').addEventListener('click', runSimulation);
-            
-            function initUI() {
-                // Hide results initially
-                document.querySelector('.simulation-results').style.display = 'none';
-                // Disable run simulation button initially
-                document.getElementById('run-simulation').disabled = true;
-            }
-            
-            function createTaxpayer() {
-                const name = document.getElementById('taxpayer-name').value.trim();
-                const tin = document.getElementById('taxpayer-tin').value.trim();
-                const income = document.getElementById('taxpayer-income').value;
-                
-                if (!name || !tin) {
-                    alert('Please enter both name and tax ID');
-                    return;
-                }
-                
-                simulationState.currentTaxpayer = {
-                    name,
-                    tin,
-                    income
-                };
-                
-                // Enable scenario selection
-                document.getElementById('run-simulation').disabled = false;
-                
-                alert(`Taxpayer profile created for ${name} (${tin})`);
-            }
-            
-            function selectScenario(e) {
-                // Remove selection from all cards
-                document.querySelectorAll('.scenario-card').forEach(card => {
-                    card.classList.remove('selected');
-                });
-                
-                // Add to clicked card
-                const card = e.currentTarget;
-                card.classList.add('selected');
-                
-                // Store selected scenario
-                simulationState.selectedScenario = card.getAttribute('data-scenario');
-            }
-            
-            function runSimulation() {
-                if (!simulationState.currentTaxpayer) {
-                    alert('Please create a taxpayer profile first');
-                    return;
-                }
-                
-                if (!simulationState.selectedScenario) {
-                    alert('Please select an evasion scenario');
-                    return;
-                }
-                
-                // Clear previous transactions
-                simulationState.transactions = [];
-                
-                // Generate transactions based on scenario
-                const numTransactions = Math.floor(Math.random() * 10) + 5; // 5-15 transactions
-                const baseAmount = getBaseAmount(simulationState.currentTaxpayer.income);
-                let totalEvaded = 0;
-                let totalDetected = 0;
-                
-                for (let i = 0; i < numTransactions; i++) {
-                    // Randomize amount (±50% of base amount)
-                    const amount = baseAmount * (0.5 + Math.random());
-                    totalEvaded += amount;
-                    
-                    // Randomize date within last 12 months
-                    const transactionDate = new Date();
-                    transactionDate.setMonth(transactionDate.getMonth() - Math.floor(Math.random() * 12));
-                    
-                    // Determine if detected based on scenario probability
-                    const isDetected = Math.random() < getDetectionProbability(simulationState.selectedScenario);
-                    const detectionMethod = isDetected ? getDetectionMethod(simulationState.selectedScenario) : null;
-                    
-                    if (isDetected) {
-                        totalDetected += amount;
-                    }
-                    
-                    simulationState.transactions.push({
-                        id: Date.now() + i,
-                        amount: parseFloat(amount.toFixed(2)),
-                        date: transactionDate,
-                        detected: isDetected,
-                        detectionDate: isDetected ? 
-                            new Date(transactionDate.getTime() + Math.random() * 30 * 24 * 60 * 60 * 1000) : null,
-                        detectionMethod: detectionMethod
-                    });
-                }
-                
-                // Update UI with results
-                displayResults(totalEvaded, totalDetected);
-                
-                // Show results section
-                document.querySelector('.simulation-results').style.display = 'block';
-            }
-            
-            function getBaseAmount(incomeLevel) {
-                switch(incomeLevel) {
-                    case 'low': return 5000;
-                    case 'medium': return 15000;
-                    case 'high': return 30000;
-                    default: return 10000;
-                }
-            }
-            
-            function getDetectionProbability(scenario) {
-                const probabilities = {
-                    offshore: 0.65,
-                    underreport: 0.45,
-                    expenses: 0.55,
-                    crypto: 0.35
-                };
-                return probabilities[scenario] || 0.5;
-            }
-            
-            function getDetectionMethod(scenario) {
-                const methods = {
-                    offshore: ['CRS Data Match', 'Bank Leak Analysis', 'Whistleblower Tip'],
-                    underreport: ['Income Discrepancy', 'Third-Party Reporting', 'Audit Findings'],
-                    expenses: ['Expense Pattern Analysis', 'Supplier Verification', 'Industry Benchmarking'],
-                    crypto: ['Blockchain Analysis', 'Exchange Reporting', 'Wallet Identification']
-                };
-                
-                const availableMethods = methods[scenario] || ['Data Analysis', 'Automated Alert', 'Manual Review'];
-                return availableMethods[Math.floor(Math.random() * availableMethods.length)];
-            }
-            
-            function displayResults(totalEvaded, totalDetected) {
-                // Update stats
-                document.getElementById('attempts-count').textContent = simulationState.transactions.length;
-                document.getElementById('detected-count').textContent = simulationState.transactions.filter(t => t.detected).length;
-                document.getElementById('detection-rate-sim').textContent = `${Math.round((totalDetected / totalEvaded) * 100)}%`;
-                document.getElementById('amount-evaded').textContent = `$${totalEvaded.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
-                
-                // Render chart
-                renderSimulationChart();
-                
-                // Render transaction list
-                renderTransactionList();
-            }
-            
-            function renderSimulationChart() {
-                const ctx = document.getElementById('simulation-chart');
-                if (!ctx) return;
-                
-                // Destroy previous chart if exists
-                if (simulationState.chart) {
-                    simulationState.chart.destroy();
-                }
-                
-                // Group transactions by month
-                const monthlyData = {};
-                simulationState.transactions.forEach(t => {
-                    const monthYear = `${t.date.getFullYear()}-${t.date.getMonth()}`;
-                    if (!monthlyData[monthYear]) {
-                        monthlyData[monthYear] = {
-                            total: 0,
-                            detected: 0
-                        };
-                    }
-                    monthlyData[monthYear].total += t.amount;
-                    if (t.detected) {
-                        monthlyData[monthYear].detected += t.amount;
-                    }
-                });
-                
-                // Prepare chart data
-                const labels = Object.keys(monthlyData).sort().map(key => {
-                    const [year, month] = key.split('-');
-                    return new Date(year, month).toLocaleDateString(undefined, {month: 'short', year: 'numeric'});
-                });
-                
-                const totalData = Object.keys(monthlyData).sort().map(key => monthlyData[key].total);
-                const detectedData = Object.keys(monthlyData).sort().map(key => monthlyData[key].detected);
-                
-                simulationState.chart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                label: 'Total Evaded',
-                                data: totalData,
-                                backgroundColor: 'rgba(52, 152, 219, 0.7)'
-                            },
-                            {
-                                label: 'Detected',
-                                data: detectedData,
-                                backgroundColor: 'rgba(46, 204, 113, 0.7)'
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Amount ($)'
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Month'
-                                }
-                            }
-                        },
-                        plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return `${context.dataset.label}: $${context.raw.toLocaleString()}`;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-            
-            function renderTransactionList() {
-                const container = document.getElementById('transaction-list');
-                if (!container) return;
-                
-                if (simulationState.transactions.length === 0) {
-                    container.innerHTML = '<p>No transactions generated</p>';
-                    return;
-                }
-                
-                // Sort by date (newest first)
-                const sortedTransactions = [...simulationState.transactions].sort((a, b) => b.date - a.date);
-                
-                container.innerHTML = sortedTransactions.map(t => `
-                    <div class="transaction-item">
-                        <div>
-                            <strong>${formatDate(t.date)}</strong>
-                            <div class="transaction-method">${simulationState.selectedScenario} • $${t.amount.toLocaleString()}</div>
-                        </div>
-                        <div class="${t.detected ? 'transaction-detected' : 'transaction-undetected'}">
-                            ${t.detected ? `Detected (${t.detectionMethod})` : 'Not detected'}
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            function formatDate(date) {
-                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && entry.target.id === 'international') {
+                fetchInternationalData();
+                observer.unobserve(entry.target);
             }
         });
+    }, {threshold: 0.1});
+    
+    const internationalSection = document.getElementById('international');
+    if (internationalSection) {
+        observer.observe(internationalSection);
+    }
+});
+
 // Set up navigation between sections
 function setupNavigation() {
+    const navLinks = document.querySelectorAll('.nav a');
+    const sections = document.querySelectorAll('.section');
+    
     navLinks.forEach(link => {
         link.addEventListener('click', function (e) {
             e.preventDefault();
 
-            // Get target section
             const targetId = this.getAttribute('href');
             const targetSection = document.querySelector(targetId);
-
             if (!targetSection) return;
 
-            // Update active nav link
             navLinks.forEach(navLink => navLink.classList.remove('active'));
             this.classList.add('active');
 
-            // Hide all sections
             sections.forEach(section => {
                 section.classList.remove('active');
             });
 
-            // Show target section
             targetSection.classList.add('active');
         });
     });
 }
+
+// Call setupNavigation on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', setupNavigation);
     </script>
 </body>
 </html>
